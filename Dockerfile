@@ -15,7 +15,12 @@ RUN apt-get update && apt-get install -y \
     g++ \
     curl \
     git \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+
+# Install uv for faster dependency installation
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.cargo/bin:$PATH"
 
 # Set working directory
 WORKDIR /app
@@ -23,8 +28,8 @@ WORKDIR /app
 # Copy requirements first for better caching
 COPY requirements.txt .
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install Python dependencies using uv (faster and more reliable)
+RUN uv pip install --system --no-cache -r requirements.txt
 
 # Copy application code
 COPY . .
