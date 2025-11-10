@@ -21,6 +21,14 @@ services:
   qdrant:
     image: qdrant/qdrant:latest
     restart: unless-stopped
+    labels:
+      - coolify.managed=true
+      - traefik.enable=true
+      - traefik.http.routers.qdrant.rule=Host(`qdrant.cognee.v1su4.com`)
+      - traefik.http.routers.qdrant.entrypoints=websecure
+      - traefik.http.routers.qdrant.tls=true
+      - traefik.http.routers.qdrant.tls.certresolver=letsencrypt
+      - traefik.http.services.qdrant.loadbalancer.server.port=6333
     ports:
       - "${QDRANT_PORT:-6333}:6333"
     volumes:
@@ -37,6 +45,14 @@ services:
   neo4j:
     image: neo4j:5-community
     restart: unless-stopped
+    labels:
+      - coolify.managed=true
+      - traefik.enable=true
+      - traefik.http.routers.neo4j.rule=Host(`neo4j.cognee.v1su4.com`)
+      - traefik.http.routers.neo4j.entrypoints=websecure
+      - traefik.http.routers.neo4j.tls=true
+      - traefik.http.routers.neo4j.tls.certresolver=letsencrypt
+      - traefik.http.services.neo4j.loadbalancer.server.port=7474
     environment:
       NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-neo4j_password}
       NEO4J_PLUGINS: '["apoc"]'
