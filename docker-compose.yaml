@@ -24,7 +24,7 @@ services:
     labels:
       - coolify.managed=true
       - traefik.enable=true
-      - traefik.http.routers.qdrant.rule=Host(`qdrant.cognee.v1su4.com`)
+      - traefik.http.routers.qdrant.rule=Host(`qdrant-cognee.v1su4.com`)
       - traefik.http.routers.qdrant.entrypoints=websecure
       - traefik.http.routers.qdrant.tls=true
       - traefik.http.routers.qdrant.tls.certresolver=letsencrypt
@@ -48,7 +48,7 @@ services:
     labels:
       - coolify.managed=true
       - traefik.enable=true
-      - traefik.http.routers.neo4j.rule=Host(`neo4j.cognee.v1su4.com`)
+      - traefik.http.routers.neo4j.rule=Host(`neo4j-cognee.v1su4.com`)
       - traefik.http.routers.neo4j.entrypoints=websecure
       - traefik.http.routers.neo4j.tls=true
       - traefik.http.routers.neo4j.tls.certresolver=letsencrypt
