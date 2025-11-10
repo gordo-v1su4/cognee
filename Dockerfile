@@ -1,5 +1,5 @@
 # Multi-stage build for Cognee self-hosted deployment
-FROM python:3.11-slim as base
+FROM python:3.11-slim AS base
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -31,6 +31,13 @@ COPY . .
 
 # Create necessary directories
 RUN mkdir -p /app/data /app/logs
+
+# Create non-root user for better security
+RUN useradd -m -u 1000 cognee && \
+    chown -R cognee:cognee /app
+
+# Switch to non-root user
+USER cognee
 
 # Expose port (default Cognee API port)
 EXPOSE 8000
