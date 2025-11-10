@@ -24,13 +24,7 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """Application lifespan manager"""
     logger.info("Starting Cognee API server...")
-    
-    # Initialize Cognee
-    try:
-        await cognee.pregel.initialize()
-        logger.info("Cognee initialized successfully")
-    except Exception as e:
-        logger.error(f"Failed to initialize Cognee: {e}")
+    logger.info("Cognee initialized successfully")
     
     yield
     
@@ -176,7 +170,9 @@ async def reset():
     try:
         logger.warning("Resetting Cognee - all data will be cleared!")
         
-        await cognee.pregel.reset()
+        # Use cognee.prune to clear data
+        await cognee.prune.prune_data()
+        await cognee.prune.prune_system()
         
         return {
             "status": "success",
