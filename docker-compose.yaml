@@ -29,8 +29,6 @@ services:
       - traefik.http.routers.qdrant.tls=true
       - traefik.http.routers.qdrant.tls.certresolver=letsencrypt
       - traefik.http.services.qdrant.loadbalancer.server.port=6333
-    environment:
-      QDRANT__SERVICE__API_KEY: ${QDRANT_API_KEY:-}
     ports:
       - "${QDRANT_PORT:-6333}:6333"
     volumes:
