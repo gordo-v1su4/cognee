@@ -28,6 +28,7 @@ MANIFEST
 venv/
 env/
 ENV/
+.venv/
 
 # Docker volumes
 postgres_data/
@@ -63,4 +64,7 @@ temp/
 secrets/
 *.pem
 *.key
+
+# Tests
+tests/
 
