@@ -1,0 +1,132 @@
+services:
+  # PostgreSQL database for Cognee
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-cognee}
+      POSTGRES_USER: ${POSTGRES_USER:-cognee}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cognee_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cognee-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cognee}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Qdrant vector store for embeddings
+  qdrant:
+    image: qdrant/qdrant:latest
+    restart: unless-stopped
+    ports:
+      - "${QDRANT_PORT:-6333}:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - cognee-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Neo4j graph database for knowledge graph
+  neo4j:
+    image: neo4j:5-community
+    restart: unless-stopped
+    environment:
+      NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-neo4j_password}
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_dbms_security_procedures_unrestricted: apoc.*
+      NEO4J_dbms_memory_heap_max__size: ${NEO4J_HEAP_SIZE:-2G}
+    ports:
+      - "${NEO4J_HTTP_PORT:-7474}:7474"
+      - "${NEO4J_BOLT_PORT:-7687}:7687"
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    networks:
+      - cognee-network
+    healthcheck:
+      test: ["CMD", "cypher-shell", "-u", "${NEO4J_USER:-neo4j}", "-p", "${NEO4J_PASSWORD:-neo4j_password}", "RETURN 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Cognee API service
+  cognee:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    labels:
+      - coolify.managed=true
+      - traefik.enable=true
+      - traefik.http.routers.cognee.rule=Host(`cognee.v1su4.com`)
+      - traefik.http.routers.cognee.entrypoints=websecure
+      - traefik.http.routers.cognee.tls=true
+      - traefik.http.routers.cognee.tls.certresolver=letsencrypt
+      - traefik.http.services.cognee.loadbalancer.server.port=8000
+    ports:
+      - "${COGNEE_PORT:-8000}:8000"
+    environment:
+      # Database configuration
+      DATABASE_URL: postgresql://${POSTGRES_USER:-cognee}:${POSTGRES_PASSWORD:-cognee_password}@postgres:5432/${POSTGRES_DB:-cognee}
+      
+      # Vector store configuration
+      VECTOR_DB_PROVIDER: ${VECTOR_DB_PROVIDER:-qdrant}
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_API_KEY: ${QDRANT_API_KEY:-}
+      
+      # Graph database configuration
+      GRAPH_DB_PROVIDER: ${GRAPH_DB_PROVIDER:-neo4j}
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: ${NEO4J_USER:-neo4j}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-neo4j_password}
+      
+      # LLM configuration
+      LLM_PROVIDER: ${LLM_PROVIDER:-openai}
+      LLM_API_KEY: ${LLM_API_KEY}
+      LLM_MODEL: ${LLM_MODEL:-gpt-4}
+      
+      # Embedding configuration
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-openai}
+      EMBEDDING_API_KEY: ${EMBEDDING_API_KEY}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-3-small}
+      
+      # Application configuration
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      COGNEE_ENV: ${COGNEE_ENV:-production}
+      
+    volumes:
+      - cognee_data:/app/data
+      - cognee_logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+    networks:
+      - cognee-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+  qdrant_data:
+  neo4j_data:
+  neo4j_logs:
+  cognee_data:
+  cognee_logs:
+
+networks:
+  cognee-network:
+
