@@ -47,6 +47,11 @@ services:
       - traefik.http.routers.neo4j.entrypoints=websecure
       - traefik.http.routers.neo4j.tls.certresolver=letsencrypt
       - traefik.http.services.neo4j.loadbalancer.server.port=7474
+      # WebSocket support for Neo4j browser
+      - traefik.http.routers.neo4j.service=neo4j
+      - traefik.http.routers.neo4j.middlewares=neo4j-headers
+      - traefik.http.middlewares.neo4j-headers.headers.customrequestheaders.X-Forwarded-Proto=https
+      - traefik.http.middlewares.neo4j-headers.headers.customrequestheaders.X-Forwarded-Host=neo4j-cognee.v1su4.com
     environment:
       NEO4J_AUTH: neo4j/${NEO4J_PASSWORD}
       NEO4J_PLUGINS: '["apoc"]'
