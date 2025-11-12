@@ -29,17 +29,10 @@ services:
       - traefik.http.routers.qdrant.entrypoints=https
       - traefik.http.routers.qdrant.tls.certresolver=letsencrypt
       - traefik.http.services.qdrant.loadbalancer.server.port=6333
-      - traefik.docker.network=kgkcc8s40skcgwos4soscs00
     volumes:
       - qdrant_data:/qdrant/storage
     networks:
       - cognee-network
-    healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:6333/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
 
   # Neo4j graph database for knowledge graph
   neo4j:
@@ -52,7 +45,6 @@ services:
       - traefik.http.routers.neo4j.entrypoints=https
       - traefik.http.routers.neo4j.tls.certresolver=letsencrypt
       - traefik.http.services.neo4j.loadbalancer.server.port=7474
-      - traefik.docker.network=kgkcc8s40skcgwos4soscs00
     environment:
       NEO4J_AUTH: neo4j/${NEO4J_PASSWORD}
       NEO4J_PLUGINS: '["apoc"]'
@@ -88,7 +80,6 @@ services:
       - traefik.http.routers.cognee.entrypoints=https
       - traefik.http.routers.cognee.tls.certresolver=letsencrypt
       - traefik.http.services.cognee.loadbalancer.server.port=8000
-      - traefik.docker.network=kgkcc8s40skcgwos4soscs00
     environment:
       # Database configuration
       DATABASE_URL: postgresql://${POSTGRES_USER:-cognee}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cognee}
@@ -125,9 +116,9 @@ services:
       postgres:
         condition: service_healthy
       qdrant:
-        condition: service_healthy
+        condition: service_started
       neo4j:
-        condition: service_healthy
+        condition: service_started
     networks:
       - cognee-network
     healthcheck:
