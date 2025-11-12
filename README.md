@@ -358,7 +358,9 @@ NEO4J_HEAP_SIZE=1G  # Reduce from 2G
 ## 📖 Documentation
 
 - [Cognee Documentation](https://docs.cognee.ai/)
+- [Cognee Documentation Reference](COGNEE_DOCS_REFERENCE.md) - Quick reference index
 - [Goose Documentation](https://block.github.io/goose/)
+- [Goose Documentation Reference](GOOSE_DOCS_REFERENCE.md) - Quick reference index
 - [Coolify Documentation](https://coolify.io/docs)
 
 ## 🔐 Security Considerations

@@ -383,8 +383,10 @@ Make sure you use **absolute paths** in the configuration:
 
 ## Resources
 
-- [Goose Documentation](https://block.github.io/goose/)
+- [Goose Documentation](https://block.github.io/goose/docs/) - Official documentation
+- [Goose Documentation Reference](GOOSE_DOCS_REFERENCE.md) - Quick reference index
 - [Cognee Documentation](https://docs.cognee.ai/)
+- [Cognee Documentation Reference](COGNEE_DOCS_REFERENCE.md) - Quick reference index
 - [MCP Protocol Spec](https://modelcontextprotocol.io/)
 - [Advanced Cognee Usage with Goose](https://block.github.io/goose/docs/tutorials/advanced-cognee-usage/)
 
