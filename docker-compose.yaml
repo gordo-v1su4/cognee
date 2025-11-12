@@ -69,10 +69,11 @@ services:
     networks:
       - cognee-network
     healthcheck:
-      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "MLtM9guB2FKcuRyEjfia", "RETURN 1"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1"]
       interval: 10s
-      timeout: 5s
-      retries: 5
+      timeout: 10s
+      retries: 10
+      start_period: 40s
 
   # Cognee API service
   cognee:
