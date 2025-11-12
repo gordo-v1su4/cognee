@@ -105,6 +105,8 @@ VECTOR_DB_PROVIDER=qdrant
 GRAPH_DB_PROVIDER=neo4j
 
 # Application
+# COGNEE_PORT controls the host port mapping (defaults to 8000)
+# The container always listens on port 8000 internally
 COGNEE_PORT=8000
 COGNEE_ENV=production
 LOG_LEVEL=INFO
@@ -405,29 +407,104 @@ If Cognee can't connect to databases:
 
 ## 🔄 Updating Your Deployment
 
-### Method 1: Git Push (Automatic)
+### Setting Up Auto-Deploy (Recommended)
 
-If you've enabled auto-deploy in Coolify:
+Auto-deploy automatically rebuilds and redeploys your application when you push changes to your GitHub repository.
+
+#### Step 1: Connect GitHub Repository (If Not Already Done)
+
+1. **In Coolify Dashboard:**
+   - Go to your resource (the `cognee` project)
+   - Navigate to **Settings** or **Source** tab
+   - If using Docker Compose method, you may need to switch to Git Repository method:
+     - Go to **Settings** → **Source**
+     - Click **"Change Source"** or **"Connect Repository"**
+     - Select **"Git Repository"**
+     - Connect your GitHub account (if not already connected)
+     - Select repository: `gordo-v1su4/cognee`
+     - Select branch: `main`
+     - Click **"Save"**
+
+#### Step 2: Enable Auto-Deploy
+
+1. **In Coolify Dashboard:**
+   - Go to your `cognee` resource
+   - Navigate to **Settings** → **Deployments** (or look for **"Auto Deploy"** section)
+   - Find **"Automatic Deployments"** or **"Webhook"** settings
+   - Toggle **"Auto Deploy"** to **ON** (or **Enabled**)
+   - Select the branch: `main` (or your default branch)
+   - Save settings
+
+#### Step 3: Verify Webhook is Created
+
+Coolify will automatically create a GitHub webhook for you. To verify:
+
+1. **In GitHub:**
+   - Go to your repository: `https://github.com/gordo-v1su4/cognee`
+   - Click **Settings** → **Webhooks**
+   - You should see a webhook pointing to your Coolify server
+   - The webhook URL will look like: `https://your-coolify-server.com/api/v1/webhooks/github`
+
+2. **Test Auto-Deploy:**
+   ```bash
+   # Make a small change
+   echo "# Test" >> README.md
+   git add README.md
+   git commit -m "Test auto-deploy"
+   git push
+   ```
+   
+   - Go to Coolify dashboard
+   - You should see a new deployment start automatically
+   - Check the **Deployments** tab to see the build progress
+
+#### Step 4: Configure Auto-Deploy Options (Optional)
+
+In Coolify, you can configure:
+
+- **Branch to watch:** Usually `main` or `master`
+- **Build on push:** Automatically build when code is pushed
+- **Deploy after build:** Automatically deploy after successful build
+- **Pull latest changes:** Always pull latest code before building
+
+**Location in Coolify:**
+- Settings → Deployments → Automatic Deployments
+- Or: Settings → Source → Auto Deploy
+
+### Method 1: Git Push (Automatic) - After Setup
+
+Once auto-deploy is enabled:
 
 ```bash
 git add .
-git commit -m "Update"
+git commit -m "Update configuration"
 git push
-# Coolify automatically rebuilds and deploys
+# Coolify automatically detects the push, rebuilds, and deploys
 ```
+
+**What happens:**
+1. You push to GitHub
+2. GitHub webhook notifies Coolify
+3. Coolify pulls latest code
+4. Coolify rebuilds Docker images
+5. Coolify redeploys containers
+6. Your changes are live! 🚀
 
 ### Method 2: Manual Redeploy
 
+If auto-deploy is disabled or you want to manually trigger:
+
 In Coolify dashboard:
 1. Go to your application
-2. Click "Redeploy"
+2. Click **"Redeploy"** or **"Deploy"** button
 3. Wait for build and deployment
 
 ### Method 3: Update Environment Variables
 
-To change configuration:
-1. Update environment variables in Coolify
-2. Click "Restart" (no rebuild needed)
+To change configuration without rebuilding:
+1. Go to **Environment Variables** in Coolify
+2. Update variables
+3. Click **"Restart"** (no rebuild needed, just restarts containers)
 
 ## 📈 Scaling & Performance
 
@@ -476,6 +553,8 @@ Deploy two instances in Coolify with different domains and configurations.
 - [ ] Deployment successful
 - [ ] Health check passing: `https://cognee.v1su4.com/health`
 - [ ] API accessible: `https://cognee.v1su4.com/docs`
+- [ ] **Auto-deploy enabled** (Settings → Deployments → Auto Deploy)
+- [ ] GitHub webhook verified (GitHub → Settings → Webhooks)
 - [ ] Goose configured with production URL
 - [ ] Backups configured
 - [ ] Monitoring set up

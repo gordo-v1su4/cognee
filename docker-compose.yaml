@@ -43,7 +43,7 @@ services:
     labels:
       - coolify.managed=true
     environment:
-      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-MLtM9guB2FKcuRyEjfia}
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD}
       NEO4J_PLUGINS: '["apoc"]'
       NEO4J_dbms_security_procedures_unrestricted: apoc.*
       NEO4J_server_memory_heap_max__size: ${NEO4J_HEAP_SIZE:-2G}
@@ -75,7 +75,9 @@ services:
       # Let Coolify handle routing automatically, or configure via Coolify UI
       # Traefik labels can be added via Coolify's domain configuration
     ports:
-      - "8000:8000"
+      # Host port is configurable via COGNEE_PORT env var (defaults to 8000)
+      # Container port remains 8000 as that's what the application listens on
+      - "${COGNEE_PORT:-8000}:8000"
     environment:
       # Database configuration
       DATABASE_URL: postgresql://${POSTGRES_USER:-cognee}:${POSTGRES_PASSWORD:-cognee_password}@postgres:5432/${POSTGRES_DB:-cognee}
@@ -89,7 +91,7 @@ services:
       GRAPH_DB_PROVIDER: neo4j
       NEO4J_URI: bolt://neo4j:7687
       NEO4J_USER: neo4j
-      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-MLtM9guB2FKcuRyEjfia}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
       
       # LLM configuration
       LLM_PROVIDER: ${LLM_PROVIDER:-openai}
