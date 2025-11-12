@@ -52,11 +52,11 @@ services:
     networks:
       - cognee-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7474"]
-      interval: 10s
+      test: ["CMD-SHELL", "curl -f http://localhost:7474 || exit 1"]
+      interval: 15s
       timeout: 10s
       retries: 10
-      start_period: 40s
+      start_period: 90s
 
   # Cognee API service
   cognee:
@@ -111,7 +111,7 @@ services:
       qdrant:
         condition: service_started
       neo4j:
-        condition: service_healthy
+        condition: service_started
     networks:
       - cognee-network
     healthcheck:
