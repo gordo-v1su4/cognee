@@ -8,7 +8,9 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && \
+    apt-get install -f -y || true && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     libpq-dev \
     python3-dev \
     gcc \
@@ -16,7 +18,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     git \
     ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install uv for faster dependency installation
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
