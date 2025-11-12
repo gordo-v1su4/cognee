@@ -23,14 +23,8 @@ services:
     restart: unless-stopped
     labels:
       - coolify.managed=true
-      - traefik.enable=true
-      - traefik.http.routers.qdrant.rule=Host(`qdrant-cognee.v1su4.com`)
-      - traefik.http.routers.qdrant.entrypoints=websecure
-      - traefik.http.routers.qdrant.tls=true
-      - traefik.http.routers.qdrant.tls.certresolver=letsencrypt
-      - traefik.http.services.qdrant.loadbalancer.server.port=6333
     ports:
-      - "${QDRANT_PORT:-6333}:6333"
+      - "6333:6333"
     volumes:
       - qdrant_data:/qdrant/storage
     networks:
@@ -48,21 +42,15 @@ services:
     restart: unless-stopped
     labels:
       - coolify.managed=true
-      - traefik.enable=true
-      - traefik.http.routers.neo4j.rule=Host(`neo4j-cognee.v1su4.com`)
-      - traefik.http.routers.neo4j.entrypoints=websecure
-      - traefik.http.routers.neo4j.tls=true
-      - traefik.http.routers.neo4j.tls.certresolver=letsencrypt
-      - traefik.http.services.neo4j.loadbalancer.server.port=7474
     environment:
-      NEO4J_AUTH: neo4j/MLtM9guB2FKcuRyEjfia
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-MLtM9guB2FKcuRyEjfia}
       NEO4J_PLUGINS: '["apoc"]'
       NEO4J_dbms_security_procedures_unrestricted: apoc.*
-      NEO4J_server_memory_heap_max__size: 2G
+      NEO4J_server_memory_heap_max__size: ${NEO4J_HEAP_SIZE:-2G}
       NEO4J_server_config_strict__validation_enabled: "false"
     ports:
-      - "${NEO4J_HTTP_PORT:-7474}:7474"
-      - "${NEO4J_BOLT_PORT:-7687}:7687"
+      - "7474:7474"
+      - "7687:7687"
     volumes:
       - neo4j_data:/data
       - neo4j_logs:/logs
@@ -80,17 +68,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: cognee:latest
     restart: unless-stopped
     labels:
       - coolify.managed=true
-      - traefik.enable=true
-      - traefik.http.routers.cognee.rule=Host(`cognee.v1su4.com`)
-      - traefik.http.routers.cognee.entrypoints=websecure
-      - traefik.http.routers.cognee.tls=true
-      - traefik.http.routers.cognee.tls.certresolver=letsencrypt
-      - traefik.http.services.cognee.loadbalancer.server.port=8000
+      # Let Coolify handle routing automatically, or configure via Coolify UI
+      # Traefik labels can be added via Coolify's domain configuration
     ports:
-      - "${COGNEE_PORT:-8000}:8000"
+      - "8000:8000"
     environment:
       # Database configuration
       DATABASE_URL: postgresql://${POSTGRES_USER:-cognee}:${POSTGRES_PASSWORD:-cognee_password}@postgres:5432/${POSTGRES_DB:-cognee}
@@ -104,7 +89,7 @@ services:
       GRAPH_DB_PROVIDER: neo4j
       NEO4J_URI: bolt://neo4j:7687
       NEO4J_USER: neo4j
-      NEO4J_PASSWORD: MLtM9guB2FKcuRyEjfia
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-MLtM9guB2FKcuRyEjfia}
       
       # LLM configuration
       LLM_PROVIDER: ${LLM_PROVIDER:-openai}

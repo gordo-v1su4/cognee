@@ -4,7 +4,7 @@
 .gitattributes
 
 # Docker
-Dockerfile
+# Note: Dockerfile is needed for build, but docker-compose.yaml doesn't need to be in image
 docker-compose.yaml
 .dockerignore
 

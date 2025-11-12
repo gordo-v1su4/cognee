@@ -309,6 +309,43 @@ goose session start
 
 ## 🐛 Troubleshooting
 
+### Build Issues in Coolify
+
+If the build is failing in Coolify but GitHub Actions passes:
+
+1. **Check Build Logs in Coolify:**
+   - Go to your resource → Build Logs
+   - Look for specific error messages
+   - Common issues:
+     - Missing Dockerfile (should be in root directory)
+     - Build context issues
+     - Missing dependencies
+
+2. **Verify Dockerfile Location:**
+   ```bash
+   # Ensure Dockerfile is in the root directory
+   ls -la Dockerfile
+   ```
+
+3. **Check Build Context:**
+   - In Coolify, ensure the build context is set to `.` (root)
+   - The docker-compose.yaml specifies `context: .` which should work
+
+4. **Common Build Fixes:**
+   - ✅ Removed `--reload` flag from Dockerfile CMD (production mode)
+   - ✅ Simplified Traefik labels (let Coolify handle routing)
+   - ✅ Fixed port configuration (removed environment variable interpolation)
+   - ✅ Added explicit `image: cognee:latest` tag
+
+5. **If Build Still Fails:**
+   ```bash
+   # Test build locally first:
+   docker build -t cognee:test .
+   
+   # Test docker-compose build:
+   docker compose build
+   ```
+
 ### Service Won't Start
 
 ```bash
@@ -348,6 +385,23 @@ If Cognee can't connect to databases:
 1. Check environment variables are set correctly
 2. Verify network configuration in docker-compose.yaml
 3. Check service logs for connection errors
+
+### Coolify-Specific Issues
+
+**Issue: Build succeeds but service won't start**
+- Check that all required environment variables are set in Coolify UI
+- Verify `LLM_API_KEY` and `EMBEDDING_API_KEY` are configured
+- Check Coolify logs for startup errors
+
+**Issue: Port conflicts**
+- Coolify manages ports automatically
+- Remove any manual port mappings if conflicting
+- Use Coolify's domain configuration instead of Traefik labels
+
+**Issue: Domain routing not working**
+- Configure domain in Coolify UI (not via docker-compose labels)
+- Coolify will automatically set up Traefik routing
+- Wait for SSL certificate to be issued
 
 ## 🔄 Updating Your Deployment
 
