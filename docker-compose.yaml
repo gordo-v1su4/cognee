@@ -26,7 +26,7 @@ services:
       - coolify.managed=true
       - traefik.enable=true
       - traefik.http.routers.qdrant.rule=Host(`qdrant-cognee.v1su4.com`)
-      - traefik.http.routers.qdrant.entrypoints=websecure
+      - traefik.http.routers.qdrant.entrypoints=https
       - traefik.http.routers.qdrant.tls.certresolver=letsencrypt
       - traefik.http.services.qdrant.loadbalancer.server.port=6333
     ports:
@@ -44,7 +44,7 @@ services:
       - coolify.managed=true
       - traefik.enable=true
       - traefik.http.routers.neo4j.rule=Host(`neo4j-cognee.v1su4.com`) && PathPrefix(`/`)
-      - traefik.http.routers.neo4j.entrypoints=websecure
+      - traefik.http.routers.neo4j.entrypoints=https
       - traefik.http.routers.neo4j.tls.certresolver=letsencrypt
       - traefik.http.services.neo4j.loadbalancer.server.port=7474
       - traefik.http.services.neo4j.loadbalancer.healthcheck.path=/
@@ -64,6 +64,7 @@ services:
       - neo4j_logs:/logs
     networks:
       - cognee-network
+      - coolify
     healthcheck:
       test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/7474 || exit 1"]
       interval: 30s
@@ -144,4 +145,7 @@ networks:
   cognee-network:
     name: cognee-network
     external: false
+  coolify:
+    name: coolify
+    external: true
 
