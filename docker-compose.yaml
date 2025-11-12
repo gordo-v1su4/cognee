@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-cognee}
       POSTGRES_USER: ${POSTGRES_USER:-cognee}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cognee_password}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -75,7 +75,7 @@ services:
       - "${COGNEE_PORT:-8000}:8000"
     environment:
       # Database configuration
-      DATABASE_URL: postgresql://${POSTGRES_USER:-cognee}:${POSTGRES_PASSWORD:-cognee_password}@postgres:5432/${POSTGRES_DB:-cognee}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-cognee}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cognee}
       
       # Vector store configuration
       VECTOR_DB_PROVIDER: ${VECTOR_DB_PROVIDER:-qdrant}
