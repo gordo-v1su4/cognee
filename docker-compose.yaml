@@ -47,6 +47,9 @@ services:
       - traefik.http.routers.neo4j.entrypoints=websecure
       - traefik.http.routers.neo4j.tls.certresolver=letsencrypt
       - traefik.http.services.neo4j.loadbalancer.server.port=7474
+      - traefik.http.services.neo4j.loadbalancer.healthcheck.path=/
+      - traefik.http.services.neo4j.loadbalancer.healthcheck.interval=10s
+      - traefik.http.services.neo4j.loadbalancer.healthcheck.timeout=5s
     environment:
       NEO4J_AUTH: neo4j/${NEO4J_PASSWORD}
       NEO4J_PLUGINS: '["apoc"]'
