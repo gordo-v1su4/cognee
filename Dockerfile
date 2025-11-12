@@ -9,17 +9,15 @@ ENV PYTHONUNBUFFERED=1 \
 
 # Install system dependencies
 RUN apt-get update && \
-    apt-get install -f -y || true && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    libpq-dev \
-    python3-dev \
-    gcc \
-    g++ \
-    curl \
-    git \
-    ca-certificates \
-    && apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+      build-essential \
+      libpq-dev \
+      python3-dev \
+      curl \
+      git \
+      ca-certificates \
+      perl \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install uv for faster dependency installation
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh

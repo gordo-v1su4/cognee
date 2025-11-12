@@ -74,8 +74,8 @@ Create or edit your Goose configuration file at `~/.config/goose/profiles.yaml`:
 ```yaml
 default:
   provider: openai
-  processor: gpt-4
-  accelerator: gpt-4
+  processor: gpt-5
+  accelerator: gpt-5
   moderator: passive
   
   toolkits:
