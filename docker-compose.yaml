@@ -68,8 +68,9 @@ services:
     labels:
       - coolify.managed=true
       # Let Coolify handle routing automatically via domain configuration
+      # Using port 8001 to avoid conflict with Coolify's management interface on port 8000
     ports:
-      - "8000:8000"
+      - "8001:8000"
     environment:
       # Database configuration
       DATABASE_URL: postgresql://${POSTGRES_USER:-cognee}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cognee}
