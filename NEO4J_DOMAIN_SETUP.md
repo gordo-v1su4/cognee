@@ -2,20 +2,28 @@
 
 This guide explains how to configure `neo4j-cognee.v1su4.com` to access your Neo4j browser.
 
+## 🌟 Wildcard DNS Setup
+
+**You have wildcard DNS `*.v1su4.com` configured!** This means:
+- ✅ No individual DNS records needed for each subdomain
+- ✅ Any subdomain automatically resolves to your server
+- ✅ Traefik labels in `docker-compose.yaml` should work automatically
+- ✅ SSL certificates will be issued automatically via Let's Encrypt
+
 ## 🔍 The Issue
 
-The `docker-compose.yaml` has Traefik labels configured for Neo4j, but Coolify might not be recognizing them automatically. Here's how to fix it:
+The `docker-compose.yaml` has Traefik labels configured for Neo4j (same pattern as Qdrant). With wildcard DNS, these should work automatically. Here's how to verify:
 
-## ✅ Solution: Configure Domain in Coolify
+## ✅ Solution: Verify Configuration
 
-### Option 1: Verify Traefik Labels Are Working (Recommended First Step)
+### Step 1: Verify Traefik Labels Are Applied
 
-1. **Check if DNS is configured:**
+1. **Check DNS resolution (should work automatically with wildcard):**
    ```bash
    nslookup neo4j-cognee.v1su4.com
    ```
-   - Should resolve to your Coolify server IP
-   - If not, add an A record in your DNS provider
+   - Should resolve to your Coolify server IP automatically
+   - **No DNS configuration needed** - wildcard handles it!
 
 2. **Verify the service is running:**
    - In Coolify dashboard, check that the `neo4j` container is running
@@ -108,15 +116,21 @@ After configuration:
 
 ### Domain Not Resolving
 
-1. **Check DNS configuration:**
-   - Add A record: `neo4j-cognee` → `[Your Server IP]`
-   - Wait 5-10 minutes for DNS propagation
+**With wildcard DNS, this should work automatically!** But if it doesn't:
 
-2. **Verify DNS:**
+1. **Verify wildcard DNS is working:**
+   ```bash
+   nslookup test-random-subdomain.v1su4.com
+   ```
+   - Should resolve to your server IP
+   - If not, check your wildcard DNS configuration
+
+2. **Verify specific subdomain:**
    ```bash
    dig neo4j-cognee.v1su4.com
    nslookup neo4j-cognee.v1su4.com
    ```
+   - Should resolve automatically via wildcard
 
 ### SSL Certificate Not Issued
 
@@ -155,11 +169,11 @@ After updating docker-compose.yaml:
 
 ## 📝 Quick Checklist
 
-- [ ] DNS A record added: `neo4j-cognee.v1su4.com` → server IP
-- [ ] DNS verified: `nslookup neo4j-cognee.v1su4.com` works
+- [x] Wildcard DNS `*.v1su4.com` configured (automatic resolution)
+- [ ] DNS verified: `nslookup neo4j-cognee.v1su4.com` works (should resolve automatically)
 - [ ] Neo4j container is running in Coolify
-- [ ] Traefik labels are in docker-compose.yaml (they are ✅)
-- [ ] SSL certificate issued (wait 2-5 minutes)
+- [ ] Traefik labels are in docker-compose.yaml (they are ✅ - same pattern as Qdrant)
+- [ ] SSL certificate issued (wait 2-5 minutes after deployment)
 - [ ] Can access: `https://neo4j-cognee.v1su4.com`
 - [ ] Can login with Neo4j credentials
 
