@@ -67,12 +67,10 @@ services:
     restart: unless-stopped
     labels:
       - coolify.managed=true
-      # Let Coolify handle routing automatically, or configure via Coolify UI
-      # Traefik labels can be added via Coolify's domain configuration
-    ports:
-      # Host port is configurable via COGNEE_PORT env var (defaults to 8000)
-      # Container port remains 8000 as that's what the application listens on
-      - "${COGNEE_PORT:-8000}:8000"
+      # Let Coolify handle routing automatically via domain configuration
+      # Coolify will route traffic to container port 8000 through the domain
+    expose:
+      - "8000"
     environment:
       # Database configuration
       DATABASE_URL: postgresql://${POSTGRES_USER:-cognee}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cognee}
