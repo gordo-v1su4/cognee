@@ -43,7 +43,7 @@ services:
     labels:
       - coolify.managed=true
       - traefik.enable=true
-      - traefik.http.routers.neo4j.rule=Host(`neo4j-cognee.v1su4.com`)
+      - traefik.http.routers.neo4j.rule=Host(`neo4j-cognee.v1su4.com`) && PathPrefix(`/`)
       - traefik.http.routers.neo4j.entrypoints=websecure
       - traefik.http.routers.neo4j.tls.certresolver=letsencrypt
       - traefik.http.services.neo4j.loadbalancer.server.port=7474
