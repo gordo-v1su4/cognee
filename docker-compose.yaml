@@ -34,6 +34,7 @@ services:
       - qdrant_data:/qdrant/storage
     networks:
       - cognee-network
+      - coolify
 
   # Neo4j graph database for knowledge graph
   neo4j:
@@ -61,6 +62,7 @@ services:
       - neo4j_logs:/logs
     networks:
       - cognee-network
+      - coolify
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474/ || exit 1"]
       interval: 30s
@@ -124,6 +126,7 @@ services:
         condition: service_started
     networks:
       - cognee-network
+      - coolify
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8000/health || exit 1"]
       interval: 30s
@@ -143,4 +146,6 @@ networks:
   cognee-network:
     name: cognee-network
     external: false
+  coolify:
+    external: true
 
