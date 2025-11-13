@@ -63,7 +63,7 @@ services:
     image: cognee:latest
     restart: unless-stopped
     environment:
-      - SERVICE_FQDN_COGNEE_8000=cognee.v1su4.com
+      - SERVICE_FQDN_COGNEE_8000
       - DATABASE_URL=postgresql://${POSTGRES_USER:-cognee}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cognee}
       - VECTOR_DB_PROVIDER=${VECTOR_DB_PROVIDER:-qdrant}
       - QDRANT_URL=http://qdrant:6333
