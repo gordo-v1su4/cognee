@@ -28,6 +28,7 @@ services:
       - traefik.http.routers.qdrant.rule=Host(`qdrant-cognee.v1su4.com`)
       - traefik.http.routers.qdrant.entrypoints=https
       - traefik.http.routers.qdrant.tls.certresolver=letsencrypt
+      - traefik.http.routers.qdrant.service=qdrant
       - traefik.http.services.qdrant.loadbalancer.server.port=6333
     volumes:
       - qdrant_data:/qdrant/storage
@@ -44,6 +45,7 @@ services:
       - traefik.http.routers.neo4j.rule=Host(`neo4j-cognee.v1su4.com`)
       - traefik.http.routers.neo4j.entrypoints=https
       - traefik.http.routers.neo4j.tls.certresolver=letsencrypt
+      - traefik.http.routers.neo4j.service=neo4j
       - traefik.http.services.neo4j.loadbalancer.server.port=7474
     environment:
       NEO4J_AUTH: neo4j/${NEO4J_PASSWORD}
@@ -79,6 +81,7 @@ services:
       - traefik.http.routers.cognee.rule=Host(`cognee.v1su4.com`)
       - traefik.http.routers.cognee.entrypoints=https
       - traefik.http.routers.cognee.tls.certresolver=letsencrypt
+      - traefik.http.routers.cognee.service=cognee
       - traefik.http.services.cognee.loadbalancer.server.port=8000
     environment:
       # Database configuration
