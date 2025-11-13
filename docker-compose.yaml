@@ -22,43 +22,24 @@ services:
   qdrant:
     image: qdrant/qdrant:v1.12.3
     restart: unless-stopped
-    labels:
-      - coolify.managed=true
-      - traefik.enable=true
-      - traefik.http.routers.qdrant.rule=Host(`qdrant-cognee.v1su4.com`)
-      - traefik.http.routers.qdrant.entrypoints=https
-      - traefik.http.routers.qdrant.tls.certresolver=letsencrypt
-      - traefik.http.routers.qdrant.service=qdrant
-      - traefik.http.services.qdrant.loadbalancer.server.port=6333
     environment:
-      # Coolify FQDN for external access
-      FQDN: qdrant-cognee.v1su4.com
+      - SERVICE_FQDN_QDRANT_6333=qdrant-cognee.v1su4.com
     volumes:
       - qdrant_data:/qdrant/storage
     networks:
       - cognee-network
-      - coolify
 
   # Neo4j graph database for knowledge graph
   neo4j:
     image: neo4j:5-community
     restart: unless-stopped
-    labels:
-      - coolify.managed=true
-      - traefik.enable=true
-      - traefik.http.routers.neo4j.rule=Host(`neo4j-cognee.v1su4.com`)
-      - traefik.http.routers.neo4j.entrypoints=https
-      - traefik.http.routers.neo4j.tls.certresolver=letsencrypt
-      - traefik.http.routers.neo4j.service=neo4j
-      - traefik.http.services.neo4j.loadbalancer.server.port=7474
     environment:
-      # Coolify FQDN for external access
-      FQDN: neo4j-cognee.v1su4.com
-      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD}
-      NEO4J_PLUGINS: '["apoc"]'
-      NEO4J_dbms_security_procedures_unrestricted: apoc.*
-      NEO4J_server_memory_heap_max__size: ${NEO4J_HEAP_SIZE:-2G}
-      NEO4J_server_config_strict__validation_enabled: "false"
+      - SERVICE_FQDN_NEO4J_7474=neo4j-cognee.v1su4.com
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}
+      - NEO4J_PLUGINS=["apoc"]
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
+      - NEO4J_server_memory_heap_max__size=${NEO4J_HEAP_SIZE:-2G}
+      - NEO4J_server_config_strict__validation_enabled=false
     # Only expose Bolt port if you need direct access from your laptop
     # ports:
     #   - "7687:7687"
@@ -67,7 +48,6 @@ services:
       - neo4j_logs:/logs
     networks:
       - cognee-network
-      - coolify
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474/ || exit 1"]
       interval: 30s
@@ -82,45 +62,24 @@ services:
       dockerfile: Dockerfile
     image: cognee:latest
     restart: unless-stopped
-    labels:
-      - coolify.managed=true
-      - traefik.enable=true
-      - traefik.http.routers.cognee.rule=Host(`cognee.v1su4.com`)
-      - traefik.http.routers.cognee.entrypoints=https
-      - traefik.http.routers.cognee.tls.certresolver=letsencrypt
-      - traefik.http.routers.cognee.service=cognee
-      - traefik.http.services.cognee.loadbalancer.server.port=8000
     environment:
-      # Coolify FQDN for external access
-      FQDN: cognee.v1su4.com
-      # Database configuration
-      DATABASE_URL: postgresql://${POSTGRES_USER:-cognee}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cognee}
-      
-      # Vector store configuration
-      VECTOR_DB_PROVIDER: ${VECTOR_DB_PROVIDER:-qdrant}
-      QDRANT_URL: http://qdrant:6333
-      QDRANT_API_KEY: ${QDRANT_API_KEY:-}
-      
-      # Graph database configuration
-      GRAPH_DB_PROVIDER: neo4j
-      NEO4J_URI: bolt://neo4j:7687
-      NEO4J_USER: neo4j
-      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
-      
-      # LLM configuration
-      LLM_PROVIDER: ${LLM_PROVIDER:-openai}
-      LLM_API_KEY: ${LLM_API_KEY}
-      LLM_MODEL: ${LLM_MODEL:-gpt-4}
-      
-      # Embedding configuration
-      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-openai}
-      EMBEDDING_API_KEY: ${EMBEDDING_API_KEY}
-      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-3-small}
-      
-      # Application configuration
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      COGNEE_ENV: ${COGNEE_ENV:-production}
-      
+      - SERVICE_FQDN_COGNEE_8000=cognee.v1su4.com
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-cognee}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cognee}
+      - VECTOR_DB_PROVIDER=${VECTOR_DB_PROVIDER:-qdrant}
+      - QDRANT_URL=http://qdrant:6333
+      - QDRANT_API_KEY=${QDRANT_API_KEY:-}
+      - GRAPH_DB_PROVIDER=neo4j
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
+      - LLM_PROVIDER=${LLM_PROVIDER:-openai}
+      - LLM_API_KEY=${LLM_API_KEY}
+      - LLM_MODEL=${LLM_MODEL:-gpt-4}
+      - EMBEDDING_PROVIDER=${EMBEDDING_PROVIDER:-openai}
+      - EMBEDDING_API_KEY=${EMBEDDING_API_KEY}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-text-embedding-3-small}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - COGNEE_ENV=${COGNEE_ENV:-production}
     volumes:
       - cognee_data:/app/data
       - cognee_logs:/app/logs
@@ -133,7 +92,6 @@ services:
         condition: service_started
     networks:
       - cognee-network
-      - coolify
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8000/health || exit 1"]
       interval: 30s
@@ -153,6 +111,4 @@ networks:
   cognee-network:
     name: cognee-network
     external: false
-  coolify:
-    external: true
 
