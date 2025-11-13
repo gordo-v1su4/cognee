@@ -30,6 +30,9 @@ services:
       - traefik.http.routers.qdrant.tls.certresolver=letsencrypt
       - traefik.http.routers.qdrant.service=qdrant
       - traefik.http.services.qdrant.loadbalancer.server.port=6333
+    environment:
+      # Coolify FQDN for external access
+      FQDN: qdrant-cognee.v1su4.com
     volumes:
       - qdrant_data:/qdrant/storage
     networks:
@@ -49,6 +52,8 @@ services:
       - traefik.http.routers.neo4j.service=neo4j
       - traefik.http.services.neo4j.loadbalancer.server.port=7474
     environment:
+      # Coolify FQDN for external access
+      FQDN: neo4j-cognee.v1su4.com
       NEO4J_AUTH: neo4j/${NEO4J_PASSWORD}
       NEO4J_PLUGINS: '["apoc"]'
       NEO4J_dbms_security_procedures_unrestricted: apoc.*
@@ -86,6 +91,8 @@ services:
       - traefik.http.routers.cognee.service=cognee
       - traefik.http.services.cognee.loadbalancer.server.port=8000
     environment:
+      # Coolify FQDN for external access
+      FQDN: cognee.v1su4.com
       # Database configuration
       DATABASE_URL: postgresql://${POSTGRES_USER:-cognee}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cognee}
       
