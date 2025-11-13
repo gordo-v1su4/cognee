@@ -29,8 +29,9 @@ WORKDIR /app
 # Copy requirements first for better caching
 COPY requirements.txt .
 
-# Install Python dependencies using uv (faster and more reliable)
-RUN uv pip install --system --no-cache -r requirements.txt
+# Install Python dependencies using uv with retries
+RUN uv pip install --system --no-cache -r requirements.txt || \
+    uv pip install --system --no-cache -r requirements.txt
 
 # Copy application code
 COPY . .
