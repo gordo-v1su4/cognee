@@ -28,6 +28,12 @@ services:
       - qdrant_data:/qdrant/storage
     networks:
       - cognee-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:6333/healthz || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   # Neo4j graph database for knowledge graph
   neo4j:
@@ -39,10 +45,9 @@ services:
       - NEO4J_PLUGINS=["apoc"]
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*
       - NEO4J_server_memory_heap_max__size=${NEO4J_HEAP_SIZE:-2G}
+      - NEO4J_server_memory_pagecache_size=${NEO4J_PAGECACHE_SIZE:-2G}
+      - NEO4J_dbms_transaction_timeout=120s
       - NEO4J_server_config_strict__validation_enabled=false
-    # Only expose Bolt port if you need direct access from your laptop
-    # ports:
-    #   - "7687:7687"
     volumes:
       - neo4j_data:/data
       - neo4j_logs:/logs
@@ -63,18 +68,18 @@ services:
     image: cognee:latest
     restart: unless-stopped
     environment:
-      - SERVICE_FQDN_COGNEE_8000
+      - SERVICE_FQDN_COGNEE_8000=cognee.v1su4.com
       - DATABASE_URL=postgresql://${POSTGRES_USER:-cognee}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cognee}
       - VECTOR_DB_PROVIDER=${VECTOR_DB_PROVIDER:-qdrant}
       - QDRANT_URL=http://qdrant:6333
       - QDRANT_API_KEY=${QDRANT_API_KEY:-}
-      - GRAPH_DB_PROVIDER=neo4j
-      - NEO4J_URI=bolt://neo4j:7687
-      - NEO4J_USER=neo4j
-      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
+      - GRAPH_DATABASE_PROVIDER=neo4j
+      - GRAPH_DATABASE_URL=bolt://neo4j:7687
+      - GRAPH_DATABASE_USERNAME=neo4j
+      - GRAPH_DATABASE_PASSWORD=${NEO4J_PASSWORD}
       - LLM_PROVIDER=${LLM_PROVIDER:-openai}
       - LLM_API_KEY=${LLM_API_KEY}
-      - LLM_MODEL=${LLM_MODEL:-gpt-4}
+      - LLM_MODEL=${LLM_MODEL:-gpt-5.1}
       - EMBEDDING_PROVIDER=${EMBEDDING_PROVIDER:-openai}
       - EMBEDDING_API_KEY=${EMBEDDING_API_KEY}
       - EMBEDDING_MODEL=${EMBEDDING_MODEL:-text-embedding-3-small}
@@ -87,9 +92,9 @@ services:
       postgres:
         condition: service_healthy
       qdrant:
-        condition: service_started
+        condition: service_healthy
       neo4j:
-        condition: service_started
+        condition: service_healthy
     networks:
       - cognee-network
     healthcheck:
