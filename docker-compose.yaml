@@ -115,5 +115,5 @@ volumes:
 networks:
   cognee-network:
     name: cognee-network
-    external: false
+    external: true
 
