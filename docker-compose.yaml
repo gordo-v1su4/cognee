@@ -23,11 +23,17 @@ services:
   qdrant:
     image: qdrant/qdrant:v1.12.3
     restart: unless-stopped
-    environment: []
     volumes:
       - qdrant_data:/qdrant/storage
     networks:
       - cognee-network
+    labels:
+      - traefik.enable=true
+      - "traefik.http.routers.qdrant-cognee.rule=Host(`qdrant-cognee.v1su4.com`) && PathPrefix(`/`)"
+      - traefik.http.routers.qdrant-cognee.entryPoints=https
+      - traefik.http.routers.qdrant-cognee.tls=true
+      - traefik.http.routers.qdrant-cognee.tls.certresolver=letsencrypt
+      - traefik.http.services.qdrant-cognee.loadbalancer.server.port=6333
 
   # Neo4j graph database for knowledge graph
   neo4j:
@@ -46,6 +52,13 @@ services:
       - neo4j_logs:/logs
     networks:
       - cognee-network
+    labels:
+      - traefik.enable=true
+      - "traefik.http.routers.neo4j-cognee.rule=Host(`neo4j-cognee.v1su4.com`) && PathPrefix(`/`)"
+      - traefik.http.routers.neo4j-cognee.entryPoints=https
+      - traefik.http.routers.neo4j-cognee.tls=true
+      - traefik.http.routers.neo4j-cognee.tls.certresolver=letsencrypt
+      - traefik.http.services.neo4j-cognee.loadbalancer.server.port=7474
     healthcheck:
       test:
         [
@@ -93,6 +106,13 @@ services:
         condition: service_healthy
     networks:
       - cognee-network
+    labels:
+      - traefik.enable=true
+      - "traefik.http.routers.cognee.rule=Host(`cognee.v1su4.com`) && PathPrefix(`/`)"
+      - traefik.http.routers.cognee.entryPoints=https
+      - traefik.http.routers.cognee.tls=true
+      - traefik.http.routers.cognee.tls.certresolver=letsencrypt
+      - traefik.http.services.cognee.loadbalancer.server.port=3000
     healthcheck:
       test:
         [
