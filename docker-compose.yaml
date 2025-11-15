@@ -1,4 +1,9 @@
-# Updated: Force Coolify to rebuild and clear environment cache
+# Simplified Coolify Docker Compose - Use Pre-built Images
+# Configure domains in Coolify UI:
+# - cognee: https://cognee.v1su4.com:3000
+# - neo4j: https://neo4j-cognee.v1su4.com:7474
+# - qdrant: https://qdrant-cognee.v1su4.com:6333
+
 services:
   # PostgreSQL database for Cognee
   postgres:
@@ -27,19 +32,29 @@ services:
       - qdrant_data:/qdrant/storage
     networks:
       - cognee-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost:6333/healthz || exit 1",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # Neo4j graph database for knowledge graph
   neo4j:
     image: neo4j:5-community
     restart: unless-stopped
     environment:
-      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}
-      - NEO4J_PLUGINS=["apoc"]
-      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
-      - NEO4J_server_memory_heap_max__size=${NEO4J_HEAP_SIZE:-2G}
-      - NEO4J_server_memory_pagecache_size=${NEO4J_PAGECACHE_SIZE:-2G}
-      - NEO4J_dbms_transaction_timeout=120s
-      - NEO4J_server_config_strict__validation_enabled=false
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD}
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_dbms_security_procedures_unrestricted: apoc.*
+      NEO4J_server_memory_heap_max__size: ${NEO4J_HEAP_SIZE:-2G}
+      NEO4J_server_memory_pagecache_size: ${NEO4J_PAGECACHE_SIZE:-2G}
+      NEO4J_dbms_transaction_timeout: 120s
+      NEO4J_server_config_strict__validation_enabled: false
     volumes:
       - neo4j_data:/data
       - neo4j_logs:/logs
@@ -56,30 +71,38 @@ services:
       retries: 5
       start_period: 120s
 
-  # Cognee API service
+  # Cognee API service - Use pre-built image
   cognee:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: cognee:latest
+    image: gordov1su4/cognee-api:latest
     restart: unless-stopped
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-cognee}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cognee}
-      - VECTOR_DB_PROVIDER=${VECTOR_DB_PROVIDER:-qdrant}
-      - QDRANT_URL=http://qdrant:6333
-      - QDRANT_API_KEY=${QDRANT_API_KEY:-}
-      - GRAPH_DATABASE_PROVIDER=neo4j
-      - GRAPH_DATABASE_URL=bolt://neo4j:7687
-      - GRAPH_DATABASE_USERNAME=neo4j
-      - GRAPH_DATABASE_PASSWORD=${NEO4J_PASSWORD}
-      - LLM_PROVIDER=${LLM_PROVIDER:-openai}
-      - LLM_API_KEY=${LLM_API_KEY}
-      - LLM_MODEL=${LLM_MODEL:-gpt-5.1}
-      - EMBEDDING_PROVIDER=${EMBEDDING_PROVIDER:-openai}
-      - EMBEDDING_API_KEY=${EMBEDDING_API_KEY}
-      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-text-embedding-3-small}
-      - LOG_LEVEL=${LOG_LEVEL:-INFO}
-      - COGNEE_ENV=${COGNEE_ENV:-production}
+      # Database Configuration
+      DATABASE_URL: postgresql://${POSTGRES_USER:-cognee}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cognee}
+
+      # Vector Database
+      VECTOR_DB_PROVIDER: ${VECTOR_DB_PROVIDER:-qdrant}
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_API_KEY: ${QDRANT_API_KEY:-}
+
+      # Graph Database
+      GRAPH_DATABASE_PROVIDER: neo4j
+      GRAPH_DATABASE_URL: bolt://neo4j:7687
+      GRAPH_DATABASE_USERNAME: neo4j
+      GRAPH_DATABASE_PASSWORD: ${NEO4J_PASSWORD}
+
+      # LLM Configuration
+      LLM_PROVIDER: ${LLM_PROVIDER:-openai}
+      LLM_API_KEY: ${LLM_API_KEY}
+      LLM_MODEL: ${LLM_MODEL:-gpt-4}
+
+      # Embedding Configuration
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-openai}
+      EMBEDDING_API_KEY: ${EMBEDDING_API_KEY}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-3-small}
+
+      # Application Configuration
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      COGNEE_ENV: ${COGNEE_ENV:-production}
     volumes:
       - cognee_data:/app/data
       - cognee_logs:/app/logs
@@ -87,7 +110,7 @@ services:
       postgres:
         condition: service_healthy
       qdrant:
-        condition: service_started
+        condition: service_healthy
       neo4j:
         condition: service_healthy
     networks:
