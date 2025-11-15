@@ -23,8 +23,6 @@ services:
   qdrant:
     image: qdrant/qdrant:v1.12.3
     restart: unless-stopped
-    environment:
-      - SERVICE_FQDN_QDRANT_6333=${SERVICE_FQDN_QDRANT_6333}
     volumes:
       - qdrant_data:/qdrant/storage
     networks:
@@ -35,7 +33,6 @@ services:
     image: neo4j:5-community
     restart: unless-stopped
     environment:
-      - SERVICE_FQDN_NEO4J_7474=${SERVICE_FQDN_NEO4J_7474}
       - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}
       - NEO4J_PLUGINS=["apoc"]
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*
@@ -67,7 +64,6 @@ services:
     image: cognee:latest
     restart: unless-stopped
     environment:
-      - SERVICE_FQDN_COGNEE_3000=${SERVICE_FQDN_COGNEE_3000}
       - DATABASE_URL=postgresql://${POSTGRES_USER:-cognee}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cognee}
       - VECTOR_DB_PROVIDER=${VECTOR_DB_PROVIDER:-qdrant}
       - QDRANT_URL=http://qdrant:6333
