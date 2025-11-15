@@ -23,23 +23,19 @@ services:
   qdrant:
     image: qdrant/qdrant:v1.12.3
     restart: unless-stopped
+    environment:
+      - SERVICE_FQDN_QDRANT_6333=qdrant-cognee.v1su4.com
     volumes:
       - qdrant_data:/qdrant/storage
     networks:
       - cognee-network
-    labels:
-      - traefik.enable=true
-      - "traefik.http.routers.qdrant-cognee.rule=Host(`qdrant-cognee.v1su4.com`) && PathPrefix(`/`)"
-      - traefik.http.routers.qdrant-cognee.entryPoints=https
-      - traefik.http.routers.qdrant-cognee.tls=true
-      - traefik.http.routers.qdrant-cognee.tls.certresolver=letsencrypt
-      - traefik.http.services.qdrant-cognee.loadbalancer.server.port=6333
 
   # Neo4j graph database for knowledge graph
   neo4j:
     image: neo4j:5-community
     restart: unless-stopped
     environment:
+      - SERVICE_FQDN_NEO4J_7474=neo4j-cognee.v1su4.com
       - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD}
       - NEO4J_PLUGINS=["apoc"]
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*
@@ -52,13 +48,6 @@ services:
       - neo4j_logs:/logs
     networks:
       - cognee-network
-    labels:
-      - traefik.enable=true
-      - "traefik.http.routers.neo4j-cognee.rule=Host(`neo4j-cognee.v1su4.com`) && PathPrefix(`/`)"
-      - traefik.http.routers.neo4j-cognee.entryPoints=https
-      - traefik.http.routers.neo4j-cognee.tls=true
-      - traefik.http.routers.neo4j-cognee.tls.certresolver=letsencrypt
-      - traefik.http.services.neo4j-cognee.loadbalancer.server.port=7474
     healthcheck:
       test:
         [
@@ -78,6 +67,7 @@ services:
     image: cognee:latest
     restart: unless-stopped
     environment:
+      - SERVICE_FQDN_COGNEE_3000=cognee.v1su4.com
       - DATABASE_URL=postgresql://${POSTGRES_USER:-cognee}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cognee}
       - VECTOR_DB_PROVIDER=${VECTOR_DB_PROVIDER:-qdrant}
       - QDRANT_URL=http://qdrant:6333
@@ -106,13 +96,6 @@ services:
         condition: service_healthy
     networks:
       - cognee-network
-    labels:
-      - traefik.enable=true
-      - "traefik.http.routers.cognee.rule=Host(`cognee.v1su4.com`) && PathPrefix(`/`)"
-      - traefik.http.routers.cognee.entryPoints=https
-      - traefik.http.routers.cognee.tls=true
-      - traefik.http.routers.cognee.tls.certresolver=letsencrypt
-      - traefik.http.services.cognee.loadbalancer.server.port=3000
     healthcheck:
       test:
         [
