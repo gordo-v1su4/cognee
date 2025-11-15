@@ -1,0 +1,100 @@
+{
+  "name": "Cognee on Coolify",
+  "description": "Self-host Cognee with PostgreSQL, Neo4j, and Qdrant using Coolify.",
+  "version": "1.0.0",
+  "type": "docker-compose",
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/your-org/cognee-coolify"
+  },
+  "services": {
+    "cognee": {
+      "name": "Cognee API",
+      "image": "gordov1su4/cognee-api:latest",
+      "port": 3000
+    },
+    "postgres": {
+      "name": "PostgreSQL",
+      "image": "postgres:15-alpine",
+      "internal": true
+    },
+    "neo4j": {
+      "name": "Neo4j",
+      "image": "neo4j:5-community",
+      "ports": [7474, 7687]
+    },
+    "qdrant": {
+      "name": "Qdrant",
+      "image": "qdrant/qdrant:v1.12.3",
+      "port": 6333
+    }
+  },
+  "volumes": {
+    "postgres_data": "PostgreSQL data persistence",
+    "neo4j_data": "Neo4j graph data persistence",
+    "neo4j_logs": "Neo4j logs",
+    "qdrant_data": "Qdrant vector data persistence",
+    "cognee_data": "Cognee knowledge graph files",
+    "cognee_logs": "Cognee service logs"
+  },
+  "environment": {
+    "required": [
+      {
+        "key": "POSTGRES_PASSWORD",
+        "description": "Password for the PostgreSQL user",
+        "type": "secret"
+      },
+      {
+        "key": "NEO4J_PASSWORD",
+        "description": "Password for the Neo4j user",
+        "type": "secret"
+      },
+      {
+        "key": "LLM_API_KEY",
+        "description": "API key for your LLM provider",
+        "type": "secret"
+      },
+      {
+        "key": "EMBEDDING_API_KEY",
+        "description": "API key for your embedding provider",
+        "type": "secret"
+      }
+    ],
+    "optional": [
+      {
+        "key": "LLM_PROVIDER",
+        "description": "LLM provider identifier",
+        "default": "openai"
+      },
+      {
+        "key": "LLM_MODEL",
+        "description": "LLM model name",
+        "default": "gpt-4o-mini"
+      },
+      {
+        "key": "EMBEDDING_PROVIDER",
+        "description": "Embedding provider identifier",
+        "default": "openai"
+      },
+      {
+        "key": "EMBEDDING_MODEL",
+        "description": "Embedding model name",
+        "default": "text-embedding-3-small"
+      },
+      {
+        "key": "LOG_LEVEL",
+        "description": "Runtime log level",
+        "default": "INFO"
+      },
+      {
+        "key": "VECTOR_DB_PROVIDER",
+        "description": "Vector database provider",
+        "default": "qdrant"
+      }
+    ]
+  },
+  "documentation": {
+    "readme": "README.md",
+    "deployment": "docs/deployment/coolify.md"
+  }
+}
