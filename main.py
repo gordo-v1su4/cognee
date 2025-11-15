@@ -2,20 +2,22 @@
 Cognee API Server - Self-hosted deployment
 This is the main entry point for the Cognee API when running as a standalone service.
 """
-import os
+
 import logging
+import os
 from contextlib import asynccontextmanager
+from typing import Any, Dict, List, Optional
+
+import cognee
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from typing import List, Optional, Dict, Any
-import cognee
 
 # Configure logging
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO"),
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -25,9 +27,9 @@ async def lifespan(app: FastAPI):
     """Application lifespan manager"""
     logger.info("Starting Cognee API server...")
     logger.info("Cognee initialized successfully")
-    
+
     yield
-    
+
     # Cleanup
     logger.info("Shutting down Cognee API server...")
 
@@ -37,7 +39,7 @@ app = FastAPI(
     title="Cognee API",
     description="Self-hosted Cognee API for AI memory and knowledge graph management",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # CORS middleware
@@ -80,7 +82,7 @@ async def root():
         "version": "1.0.0",
         "status": "running",
         "docs": "/docs",
-        "health": "/health"
+        "health": "/health",
     }
 
 
@@ -93,17 +95,17 @@ async def add_data(request: AddDataRequest):
     try:
         data = request.data
         dataset_name = request.dataset_name
-        
+
         logger.info(f"Adding data to dataset: {dataset_name}")
-        
+
         # Add data using Cognee
         result = await cognee.add(data, dataset_name=dataset_name)
-        
+
         return {
             "status": "success",
             "message": "Data added successfully",
             "dataset": dataset_name,
-            "result": result
+            "result": result,
         }
     except Exception as e:
         logger.error(f"Error adding data: {e}")
@@ -118,17 +120,17 @@ async def cognify(request: CognifyRequest = None):
     """
     try:
         dataset_name = request.dataset_name if request else "default"
-        
+
         logger.info(f"Starting cognification for dataset: {dataset_name}")
-        
+
         # Run cognification
         result = await cognee.cognify()
-        
+
         return {
             "status": "success",
             "message": "Cognification completed",
             "dataset": dataset_name,
-            "result": result
+            "result": result,
         }
     except Exception as e:
         logger.error(f"Error during cognification: {e}")
@@ -144,18 +146,13 @@ async def search(request: SearchRequest):
     try:
         query = request.query
         mode = request.mode
-        
+
         logger.info(f"Searching with query: {query}")
-        
+
         # Perform search
         results = await cognee.search(query, mode=mode)
-        
-        return {
-            "status": "success",
-            "query": query,
-            "mode": mode,
-            "results": results
-        }
+
+        return {"status": "success", "query": query, "mode": mode, "results": results}
     except Exception as e:
         logger.error(f"Error during search: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -169,15 +166,12 @@ async def reset():
     """
     try:
         logger.warning("Resetting Cognee - all data will be cleared!")
-        
+
         # Use cognee.prune to clear data
         await cognee.prune.prune_data()
         await cognee.prune.prune_system()
-        
-        return {
-            "status": "success",
-            "message": "Cognee has been reset"
-        }
+
+        return {"status": "success", "message": "Cognee has been reset"}
     except Exception as e:
         logger.error(f"Error during reset: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -194,7 +188,7 @@ async def get_status():
             "environment": os.getenv("COGNEE_ENV", "production"),
             "llm_provider": os.getenv("LLM_PROVIDER", "openai"),
             "vector_db": os.getenv("VECTOR_DB_PROVIDER", "qdrant"),
-            "graph_db": os.getenv("GRAPH_DB_PROVIDER", "neo4j")
+            "graph_db": os.getenv("GRAPH_DB_PROVIDER", "neo4j"),
         }
     except Exception as e:
         logger.error(f"Error getting status: {e}")
@@ -203,12 +197,11 @@ async def get_status():
 
 if __name__ == "__main__":
     import uvicorn
-    
-    port = int(os.getenv("COGNEE_PORT", 8000))
+
+    port = int(os.getenv("COGNEE_PORT", 3000))
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
         port=port,
-        reload=os.getenv("COGNEE_ENV") != "production"
+        reload=os.getenv("COGNEE_ENV") != "production",
     )
-

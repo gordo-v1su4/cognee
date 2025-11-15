@@ -48,7 +48,11 @@ services:
     networks:
       - cognee-network
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474/ || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost:7474/ || exit 1",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -62,7 +66,7 @@ services:
     image: cognee:latest
     restart: unless-stopped
     environment:
-      - SERVICE_FQDN_COGNEE_8000=cognee.v1su4.com
+      - SERVICE_FQDN_COGNEE_3000=cognee.v1su4.com
       - DATABASE_URL=postgresql://${POSTGRES_USER:-cognee}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-cognee}
       - VECTOR_DB_PROVIDER=${VECTOR_DB_PROVIDER:-qdrant}
       - QDRANT_URL=http://qdrant:6333
@@ -92,7 +96,11 @@ services:
     networks:
       - cognee-network
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8000/health || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -110,4 +118,3 @@ networks:
   cognee-network:
     name: cognee-network
     external: true
-
